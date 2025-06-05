@@ -5,6 +5,11 @@ import itertools
 import math
 import typing
 
+import numpy as np
+import pandas as pd
+
+from PIL import Image
+
 T = typing.TypeVar("T", int, float)
 Vector = typing.Tuple[T, T]
 VectorComponent = typing.List[T]
@@ -216,3 +221,28 @@ class TreeNode:
             return nodes
 
         return get_iter_child(self, [])
+
+
+def load_image(filename: str, mode: str = "RGB"):
+    with Image.open(filename) as img:
+        im = img.convert(mode)
+        return im, np.asarray(im)
+
+
+if __name__ == "__main__":
+    img, img_arr = load_image("resources/b-source-0.bmp", "I")
+    nodes = []
+
+    for y, row in enumerate(img_arr):
+        for x, p in enumerate(row):
+            nodes.append(Node((x, y), p))
+
+    mask_a, mask_b = [], []
+
+    for n in nodes:
+        if n.value != 0:
+            mask_a.append(n)
+        else:
+            mask_b.append(n)
+    
+    print(mask_a)
