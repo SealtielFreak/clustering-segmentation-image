@@ -1,4 +1,7 @@
+import random
+
 import numpy as np
+import matplotlib.pyplot as plt
 
 from PIL import Image
 
@@ -92,10 +95,10 @@ class TreeClassify:
 
 
 if __name__ == "__main__":
-    img, img_arr = load_image("resources/b-source-0.bmp", "I")
+    source_img, source_img_arr = load_image("resources/b-source-0.bmp", "I")
     pixels = []
 
-    for y, row in enumerate(img_arr):
+    for y, row in enumerate(source_img_arr):
         for x, p in enumerate(row):
             pixels.append(PointData((x, y), p))
 
@@ -107,12 +110,38 @@ if __name__ == "__main__":
         else:
             mask_b.append(p)
 
-    width, height = img_arr.shape
+    width, height = source_img_arr.shape
     segmentation = TreeClassify((width, height))
 
     [segmentation.insert(p) for p in mask_b]
 
     clusters = segmentation.sort()
 
+    source_img_arr = np.array([[(255, 255, 255) for _ in range(width)] for _ in range(height)], dtype=np.uint8)
+
+    cluster_rgb = (
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
+    )
+
     for i, cluster in enumerate(clusters):
         print(f"Cluster[{i}]: {cluster}")
+
+        for point in cluster:
+            x, y = point.position
+            source_img_arr[y][x] = cluster_rgb[random.randint(0, 2)]
+
+    results_img = Image.fromarray(source_img_arr)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+    axes[0].imshow(source_img)
+    axes[0].set_title("Source image")
+    axes[0].axis('off')
+
+    axes[1].imshow(results_img)
+    axes[1].set_title("Final image")
+    axes[1].axis('off')
+
+    plt.tight_layout()
+    plt.show()
