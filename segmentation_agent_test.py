@@ -22,7 +22,7 @@ class PointData:
     def __init__(self, position, value):
         self.position = position
         self.value = value
-        
+
     @property
     def x(self):
         return self.position[0]
@@ -37,16 +37,19 @@ class PointData:
     def __str__(self):
         return f"({self.position}, {self.value})"
 
+    def __repr__(self):
+        return f"({self.position}, {self.value})"
+
 
 class AxisSegmentation:
     def __init__(self, index):
         self.__index = index
         self.__clusters = {}
         
-    def append(self, agent):
-        a, b = agent
+    def append(self, point: PointData):
+        a, b = point.position
         
-        self.__clusters[b] = agent
+        self.__clusters[b] = point
     
     def sort(self):
         return list(self.__clusters.values())
@@ -67,20 +70,22 @@ class AxisSegmentation:
 
 
 class TreeClassify:
-    def __init__(self, size):
-        self.agents = []
+    def __init__(self, size: tuple[int, int]):
+        self.points = []
         self.__segmentation = {}
-    
-        for c in range(size):
+
+        width, height = size
+
+        for c in range(width):
             self.__segmentation[c] = AxisSegmentation(c)
         
-    def insert(self, agent):
-        self.agents.append(agent)
+    def insert(self, point):
+        self.points.append(point)
         
     def sort(self):
-        for agent in self.agents:
-            a, b = agent
-            self.__segmentation[a].append(agent)
+        for point in self.points:
+            a, b = point.position
+            self.__segmentation[a].append(point)
         
         clusters = []
         group = []
@@ -90,13 +95,13 @@ class TreeClassify:
                 clusters.append(group)
                 group = []
             else:
-                group += (cluster.sort())
+                group += cluster.sort()
         
         return [*filter(lambda a: len(a) > 0, clusters)]
     
 
 if __name__ == "__main__":
-    img, img_arr = load_image("resources/b-source-3.bmp", "I")
+    img, img_arr = load_image("resources/b-source-0.bmp", "I")
     pixels = []
 
     for y, row in enumerate(img_arr):
@@ -110,12 +115,14 @@ if __name__ == "__main__":
             mask_a.append(p)
         else:
             mask_b.append(p)
-    
-    print(", ".join(map(str, mask_b)))
 
-    segmentation = TreeClassify()
+    width, height = img_arr.shape
+    segmentation = TreeClassify((width, height))
     
     [segmentation.insert(p) for p in mask_b]
-    
-    segmentation.sort()
+
+    clusters = segmentation.sort()
+
+    for i, cluster in enumerate(clusters):
+        print(f"Cluster[{i}]: {cluster}")
     
