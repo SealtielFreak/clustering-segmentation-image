@@ -1,0 +1,6 @@
+numpy~=2.3.0rc1
+matplotlib~=3.10.3
+pillow~=11.2.1
+playwright~=1.52.0
+notebook~=7.5.0a0
+pandoc~=2.4
